@@ -222,3 +222,48 @@ body {
     opacity: 0.4;
   }
 }
+
+.apple-dot {
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 48% 48% 50% 50%;
+  position: relative;
+  background: var(--apple-fill, linear-gradient(135deg, #bbf7d0, #22c55e));
+  box-shadow: inset -4px -6px 8px rgba(0, 0, 0, 0.15),
+    0 3px 6px rgba(0, 0, 0, 0.2);
+  transition: transform 0.2s ease, filter 0.2s ease;
+}
+
+.apple-dot::before {
+  content: '';
+  position: absolute;
+  width: 0.45rem;
+  height: 0.25rem;
+  background: #a3e635;
+  border-radius: 50%;
+  top: -0.15rem;
+  left: 55%;
+  transform: rotate(-25deg);
+  box-shadow: inset -1px -1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.apple-dot::after {
+  content: '';
+  position: absolute;
+  width: 0.15rem;
+  height: 0.35rem;
+  background: #4d3122;
+  top: -0.3rem;
+  left: 45%;
+  border-radius: 999px;
+}
+
+.apple-dot--green {
+  --apple-fill: linear-gradient(135deg, #d9f99d, #22c55e);
+}
+
+.apple-dot--red {
+  --apple-fill: linear-gradient(135deg, #fecaca, #ef4444);
+  transform: scale(1.08);
+  filter: drop-shadow(0 2px 4px rgba(239, 68, 68, 0.35));
+}

@@ -250,11 +250,7 @@ export default function QuantitativeNumberGame() {
               return (
                 <div
                   key={i}
-                  className={`w-4 h-4 sm:w-5 sm:h-5 rounded-full shadow transition-all ${
-                    filled
-                      ? 'bg-gradient-to-br from-emerald-300 to-green-500 scale-110'
-                      : 'bg-gradient-to-br from-orange-200 to-orange-400 opacity-80'
-                  }`}
+                  className={`apple-dot ${filled ? 'apple-dot--red' : 'apple-dot--green'}`}
                 />
               );
             })}

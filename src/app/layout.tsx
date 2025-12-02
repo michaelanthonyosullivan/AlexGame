@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Michael's Number Game",
+  title: "Alex's Number Game",
   description:
     "A playful tap-counting game that helps children feel the size of small numbers.",
 };

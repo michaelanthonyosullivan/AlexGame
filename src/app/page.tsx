@@ -278,7 +278,7 @@ export default function QuantitativeNumberGame() {
         )}
 
         <h1 className="text-center text-3xl sm:text-4xl font-bold text-indigo-700 mb-2 drop-shadow-md">
-          Michael&apos;s Number Game
+          Alex&apos;s Number Game
         </h1>
         <p className="text-center text-sm text-gray-600 mb-6">
           Look at the number. Tap the big button the same number of times!

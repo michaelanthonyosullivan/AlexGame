@@ -26,6 +26,14 @@ type StarSpec = {
   delay: number;
 };
 
+type SparkleSpec = {
+  top: number;
+  left: number;
+  delay: number;
+  size: number;
+  color: string;
+};
+
 const CONFETTI_COLORS = [
   '#f97316',
   '#facc15',
@@ -46,23 +54,40 @@ const STAR_SPECS: StarSpec[] = [
   { top: 70, left: 80, delay: 0.4 },
   { top: 85, left: 30, delay: 0.45 },
   { top: 88, left: 65, delay: 0.5 },
+  { top: 15, left: 45, delay: 0.6 },
+  { top: 25, left: 25, delay: 0.7 },
+  { top: 40, left: 60, delay: 0.8 },
+  { top: 55, left: 35, delay: 0.9 },
+  { top: 75, left: 50, delay: 1.0 },
+  { top: 20, left: 80, delay: 1.1 },
+  { top: 50, left: 15, delay: 1.2 },
+  { top: 60, left: 70, delay: 1.3 },
 ];
 
 const createConfettiPieces = (): ConfettiPiece[] =>
-  Array.from({ length: 36 }, (_, idx) => ({
+  Array.from({ length: 120 }, (_, idx) => ({
     left: Math.random() * 100,
     drift: Math.random() * 120 - 60,
-    duration: 1 + Math.random() * 0.7,
-    delay: idx * 0.035,
+    duration: 2 + Math.random() * 1.5,
+    delay: idx * 0.02,
     color: CONFETTI_COLORS[idx % CONFETTI_COLORS.length],
   }));
 
 const createBalloonSpecs = (): BalloonSpec[] =>
-  Array.from({ length: 6 }, () => ({
+  Array.from({ length: 20 }, () => ({
     left: Math.random() * 80 + 10,
-    delay: Math.random() * 0.6,
+    delay: Math.random() * 1.2,
     color: BALLOON_COLORS[Math.floor(Math.random() * BALLOON_COLORS.length)],
     scale: 0.7 + Math.random() * 0.5,
+  }));
+
+const createSparkleSpecs = (): SparkleSpec[] =>
+  Array.from({ length: 30 }, () => ({
+    top: Math.random() * 100,
+    left: Math.random() * 100,
+    delay: Math.random() * 2,
+    size: 8 + Math.random() * 12,
+    color: CONFETTI_COLORS[Math.floor(Math.random() * CONFETTI_COLORS.length)],
   }));
 
 function getRandomTarget(): number {
@@ -86,53 +111,142 @@ function playCelebrationSound() {
 
   const ctx = new AudioCtx();
   const now = ctx.currentTime;
-  // Simple little "TA-DAH" melody: G4–C5–E5–G5, ending with a bright chord
-  const melody: Array<{ freq: number; time: number }> = [
-    { freq: 392.0, time: 0.0 },  // G4
-    { freq: 523.25, time: 0.22 }, // C5
-    { freq: 659.25, time: 0.44 }, // E5
-    { freq: 784.0, time: 0.66 },  // G5
+
+  // Extended victory fanfare - multiple phases
+  // Phase 1: Opening fanfare (0-1.5s)
+  const fanfare1: Array<{ freq: number; time: number; duration: number }> = [
+    { freq: 523.25, time: 0.0, duration: 0.3 },   // C5
+    { freq: 659.25, time: 0.3, duration: 0.3 },  // E5
+    { freq: 784.0, time: 0.6, duration: 0.4 },    // G5
+    { freq: 987.77, time: 1.0, duration: 0.5 },  // B5
   ];
 
-  melody.forEach(({ freq, time }, idx) => {
+  fanfare1.forEach(({ freq, time, duration }) => {
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
-
-    osc.type = idx === melody.length - 1 ? 'square' : 'triangle';
-    osc.frequency.setValueAtTime(freq, now + time);
-
-    gain.gain.setValueAtTime(0.0001, now + time);
-    gain.gain.exponentialRampToValueAtTime(0.6, now + time + 0.07);
-    gain.gain.exponentialRampToValueAtTime(0.0001, now + time + 0.45);
-
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-
-    osc.start(now + time);
-    osc.stop(now + time + 0.6);
-  });
-
-  // Final "DAH" chord at the end for extra musicality
-  const chordStart = now + 0.95;
-  const chordNotes = [523.25, 659.25, 784.0]; // C5, E5, G5
-
-  chordNotes.forEach(freq => {
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-
     osc.type = 'square';
-    osc.frequency.setValueAtTime(freq, chordStart);
-
-    gain.gain.setValueAtTime(0.0001, chordStart);
-    gain.gain.exponentialRampToValueAtTime(0.5, chordStart + 0.06);
-    gain.gain.exponentialRampToValueAtTime(0.0001, chordStart + 0.6);
-
+    osc.frequency.setValueAtTime(freq, now + time);
+    gain.gain.setValueAtTime(0.0001, now + time);
+    gain.gain.exponentialRampToValueAtTime(0.5, now + time + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + time + duration);
     osc.connect(gain);
     gain.connect(ctx.destination);
-
-    osc.start(chordStart);
-    osc.stop(chordStart + 0.7);
+    osc.start(now + time);
+    osc.stop(now + time + duration);
   });
+
+  // Phase 2: Bells/chimes layer (0.5-3s)
+  const bellNotes = [
+    { freq: 523.25, time: 0.5 },  // C5
+    { freq: 659.25, time: 0.8 },  // E5
+    { freq: 784.0, time: 1.1 },   // G5
+    { freq: 1046.5, time: 1.4 }, // C6
+    { freq: 1318.5, time: 1.7 }, // E6
+    { freq: 1568.0, time: 2.0 },  // G6
+    { freq: 1046.5, time: 2.3 },  // C6
+    { freq: 1318.5, time: 2.6 }, // E6
+  ];
+
+  bellNotes.forEach(({ freq, time }) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(freq, now + time);
+    gain.gain.setValueAtTime(0.0001, now + time);
+    gain.gain.exponentialRampToValueAtTime(0.4, now + time + 0.1);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + time + 1.2);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now + time);
+    osc.stop(now + time + 1.5);
+  });
+
+  // Phase 3: Whistle/trumpet layer (1.5-4s)
+  const whistleNotes = [
+    { freq: 784.0, time: 1.5 },   // G5
+    { freq: 987.77, time: 1.8 },  // B5
+    { freq: 1174.66, time: 2.1 }, // D6
+    { freq: 1318.51, time: 2.4 }, // E6
+    { freq: 1567.98, time: 2.7 }, // G6
+  ];
+
+  whistleNotes.forEach(({ freq, time }, idx) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(freq, now + time);
+    gain.gain.setValueAtTime(0.0001, now + time);
+    gain.gain.exponentialRampToValueAtTime(0.3, now + time + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + time + 0.4);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now + time);
+    osc.stop(now + time + 0.5);
+  });
+
+  // Phase 4: Main melody - extended (2.0-5.5s)
+  const mainMelody: Array<{ freq: number; time: number; duration: number }> = [
+    { freq: 392.0, time: 2.0, duration: 0.4 },   // G4
+    { freq: 523.25, time: 2.5, duration: 0.4 },  // C5
+    { freq: 659.25, time: 3.0, duration: 0.4 },  // E5
+    { freq: 784.0, time: 3.5, duration: 0.5 },  // G5
+    { freq: 987.77, time: 4.1, duration: 0.5 }, // B5
+    { freq: 1174.66, time: 4.7, duration: 0.6 }, // D6
+  ];
+
+  mainMelody.forEach(({ freq, time, duration }, idx) => {
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = idx >= 3 ? 'square' : 'triangle';
+    osc.frequency.setValueAtTime(freq, now + time);
+    gain.gain.setValueAtTime(0.0001, now + time);
+    gain.gain.exponentialRampToValueAtTime(0.6, now + time + 0.08);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + time + duration);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now + time);
+    osc.stop(now + time + duration);
+  });
+
+  // Phase 5: Grand finale chords (4.5-6.5s)
+  const finaleChords = [
+    { time: 4.5, notes: [523.25, 659.25, 784.0] },      // C5, E5, G5
+    { time: 5.2, notes: [659.25, 783.99, 987.77] },    // E5, G5, B5
+    { time: 5.9, notes: [523.25, 659.25, 784.0, 1046.5] }, // C5, E5, G5, C6
+  ];
+
+  finaleChords.forEach(({ time, notes }) => {
+    notes.forEach(freq => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.setValueAtTime(freq, now + time);
+      gain.gain.setValueAtTime(0.0001, now + time);
+      gain.gain.exponentialRampToValueAtTime(0.5, now + time + 0.08);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + time + 0.8);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(now + time);
+      osc.stop(now + time + 1.0);
+    });
+  });
+
+  // Phase 6: Sparkle effects - high frequency chimes (3.0-7.0s)
+  for (let i = 0; i < 12; i++) {
+    const sparkleTime = 3.0 + i * 0.3;
+    const sparkleFreq = 2000 + Math.random() * 1000;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(sparkleFreq, now + sparkleTime);
+    gain.gain.setValueAtTime(0.0001, now + sparkleTime);
+    gain.gain.exponentialRampToValueAtTime(0.2, now + sparkleTime + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + sparkleTime + 0.15);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(now + sparkleTime);
+    osc.stop(now + sparkleTime + 0.2);
+  }
 }
 
 function playPopSound() {
@@ -175,6 +289,7 @@ export default function QuantitativeNumberGame() {
   const [status, setStatus] = useState<GameStatus>('playing');
   const [confettiPieces, setConfettiPieces] = useState<ConfettiPiece[]>([]);
   const [balloons, setBalloons] = useState<BalloonSpec[]>([]);
+  const [sparkles, setSparkles] = useState<SparkleSpec[]>([]);
   const prevTapCountRef = useRef<number>(0);
 
   // Initialize target on mount
@@ -196,6 +311,7 @@ export default function QuantitativeNumberGame() {
     setStatus('playing');
     setConfettiPieces([]);
     setBalloons([]);
+    setSparkles([]);
   };
 
   const handleTap = () => {
@@ -209,9 +325,10 @@ export default function QuantitativeNumberGame() {
         setStatus('success');
         setConfettiPieces(createConfettiPieces());
         setBalloons(createBalloonSpecs());
+        setSparkles(createSparkleSpecs());
         playCelebrationSound();
       }, 400);
-      setTimeout(startNewRound, 2400);
+      setTimeout(startNewRound, 10000); // Extended to 10 seconds!
     } else if (nextCount > target) {
       setStatus('too-many');
       setTimeout(startNewRound, 1000);
@@ -232,7 +349,7 @@ export default function QuantitativeNumberGame() {
         <div className="background-bubble bubble-three" />
       </div>
 
-      <div className="relative w-full max-w-md rounded-3xl bg-amber-50 shadow-2xl px-6 py-8 sm:px-10 sm:py-10">
+      <div className={`relative w-full max-w-md rounded-3xl bg-amber-50 shadow-2xl px-6 py-8 sm:px-10 sm:py-10 ${isSuccess ? 'celebration-glow' : ''}`}>
         {isSuccess && (
           <div className="pointer-events-none absolute inset-0 overflow-hidden">
             <div className="success-balloons">
@@ -271,6 +388,23 @@ export default function QuantitativeNumberGame() {
                     left: `${star.left}%`,
                     animationDelay: `${star.delay}s`,
                   }}
+                />
+              ))}
+            </div>
+            <div className="success-sparkles">
+              {sparkles.map((sparkle, idx) => (
+                <span
+                  key={`sparkle-${idx}`}
+                  className="celebration-sparkle"
+                  style={{
+                    top: `${sparkle.top}%`,
+                    left: `${sparkle.left}%`,
+                    animationDelay: `${sparkle.delay}s`,
+                    width: `${sparkle.size}px`,
+                    height: `${sparkle.size}px`,
+                    backgroundColor: sparkle.color,
+                    '--sparkle-size': `${sparkle.size}px`,
+                  } as CSSProperties}
                 />
               ))}
             </div>
